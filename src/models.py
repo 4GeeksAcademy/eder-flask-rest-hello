@@ -14,7 +14,7 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(80),  nullable=False)
     is_active = db.Column(db.Boolean(),  nullable=False)
-    created = db.Column(db.DateTime(timezone=True),server_default=func.now(),nullable=False)
+    created = db.Column(db.DateTime(timezone=True),server_default=func.now(),nullable=True)
     favorite = db.relationship('Favorite',backref="user",lazy=True)
 
     def __repr__(self):
@@ -73,7 +73,7 @@ class Vehicle(db.Model):
     max_speed = db.Column(db.String(120),nullable=False)
     cargo_capacity = db.Column(db.String(120),nullable=False)
     consumable = db.Column(db.String(120),nullable=False)    
-    created=db.Column(db.DateTime(timezone=True),default=func.now(),nullable=False)
+    created=db.Column(db.DateTime(timezone=True),server_default=func.now(),nullable=False)
     favorite = db.relationship('Favorite',backref='vehicle',lazy=True)
 
     

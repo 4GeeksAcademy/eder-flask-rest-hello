@@ -8,7 +8,8 @@ from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, User
+from models import db, User,People,Vehicle,Favorite,Planet
+from flask_sqlalchemy import SQLAlchemy
 #from models import Person
 
 app = Flask(__name__)
@@ -44,6 +45,28 @@ def handle_hello():
     }
 
     return jsonify(response_body), 200
+
+@app.route('/people', methods=['GET'])
+def get_all_people():
+    query_result = People.query.all()
+    try:
+     if query_result == None:
+         return ({"msg":"There are no characters in the list"})
+     else: 
+        result = list(map(lambda item: item.serialize(),query_result))     
+        return jsonify(result), 200  
+        
+    except Exception as err:
+        return ({"error":"There was an unexpected error","msg":str(err)})
+    
+@app.route('/people/<int:id>',methods=['GET'])
+def get_specific_people(id):
+    query_people = People.query.get_or_404(id)
+    print(query_people)
+    result = query_people.serialize()
+    print(result)
+    return jsonify(result)
+    
 
 # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':
