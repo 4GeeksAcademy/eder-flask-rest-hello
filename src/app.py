@@ -46,6 +46,8 @@ def handle_hello():
 
     return jsonify(response_body), 200
 
+""" PEOPLE ENDPOINTS """
+
 @app.route('/people', methods=['GET'])
 def get_all_people():
     query_result = People.query.all()
@@ -61,12 +63,39 @@ def get_all_people():
     
 @app.route('/people/<int:id>',methods=['GET'])
 def get_specific_people(id):
-    query_people = People.query.get_or_404(id)
-    print(query_people)
-    result = query_people.serialize()
-    print(result)
+    query_people = People.query.get_or_404(id)    
+    result = query_people.serialize()   
     return jsonify(result)
     
+
+""" PLANETS ENDPOITS """
+
+
+@app.route('/planets',methods=['GET'])
+def get_all_planets():
+    """ query_planets2 =  Planet.query.all() """
+    """ SON EQUIVALENTES """
+    query_planets = db.session.query(Planet).all()  
+
+    try:
+        if query_planets == None:
+            return ({"msg":"There are no planets registered yet"})
+        else: 
+            result = list(map(lambda item: item.serialize(),query_planets))
+            return jsonify(result)
+    except Exception as err:
+        return ({"error":"There was an unexpected error","error":str(err)})
+    
+   
+@app.route('/planets/<int:id>',methods=['GET'])
+def get_specific_planet(id):
+    query_planet = db.session.query(Planet).get_or_404(id,f'Sorry there is no planet with id "{id}" registered')
+    result = query_planet.serialize()
+    return jsonify(result)
+
+
+
+
 
 # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':
