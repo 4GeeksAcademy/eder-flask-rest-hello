@@ -40,7 +40,7 @@ class Planet(db.Model):
     climate = db.Column(db.String(120),nullable=False)
     terrain = db.Column(db.String(120),nullable=False)
     surface_water = db.Column(db.String(120),nullable=False)
-    created = db.Column(db.DateTime(timezone=True),server_default=func.now(),nullable=False)
+    created = db.Column(db.DateTime(timezone=True),server_default=func.now(),nullable=True)
     favorite = db.relationship('Favorite',backref='planet',lazy=True)
 
         
@@ -66,14 +66,14 @@ class Vehicle(db.Model):
     vehicleID = db.Column(db.Integer,primary_key=True)
     name = db.Column(db.String(120),nullable=False)
     model = db.Column(db.String(120),nullable=False)
-    vehicles_class = db.Column(db.String(120),nullable=False)
+    vehicle_class = db.Column(db.String(120),nullable=False)
     manufacturer = db.Column(db.String(120),nullable=False)
     lenght = db.Column(db.String(120),nullable=False)
-    cost = db.Column(db.String(120),nullable=False)
+    cost_credits = db.Column(db.String(120),nullable=False)
     max_speed = db.Column(db.String(120),nullable=False)
     cargo_capacity = db.Column(db.String(120),nullable=False)
     consumable = db.Column(db.String(120),nullable=False)    
-    created=db.Column(db.DateTime(timezone=True),server_default=func.now(),nullable=False)
+    created=db.Column(db.DateTime(timezone=True),server_default=func.now(),nullable=True)
     favorite = db.relationship('Favorite',backref='vehicle',lazy=True)
 
     
@@ -85,13 +85,13 @@ class Vehicle(db.Model):
             "id": self.vehicleId,
             "name":self.name,
             "model":self.model,
-            "class":self.vehicles_class,
+            "vehicle_class":self.vehicle_class,
             "manufacturer":self.manufacturer,
             "lenght":self.lenght,
-            "cost_credits": self.cost,
+            "cost_credits": self.cost_credits,
             "max_speed": self.max_speed,
             "cargo_capacity":self.cargo_capacity,
-            "consumables":self.consumable,                       
+            "consumable":self.consumable,                       
             # do not serialize the password, its a security breach
         }
   
@@ -106,7 +106,7 @@ class People(db.Model):
     mass = db.Column(db.String(120),nullable=False)
     skin_color = db.Column(db.String(120),nullable=False)
     homeworld = db.Column(db.String(120),nullable=False)    
-    created = db.Column(db.DateTime(timezone=True),server_default=func.now(),nullable=False)
+    created = db.Column(db.DateTime(timezone=True),server_default=func.now(),nullable=True)
     favorite = db.relationship('Favorite',backref='people',lazy=True)
 
     def __repr__(self):

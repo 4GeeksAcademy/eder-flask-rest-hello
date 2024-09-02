@@ -55,12 +55,15 @@ def get_all_users():
     except Exception as err:
         return jsonify({"error":"There was an unexpected error","msg":str(err)}),500        
 
-@app.route('/users/<int:id_user',methods=['GET'])
+@app.route('/users/<int:id_user>',methods=['GET'])
 def get_specific_user(id_user):
     query_user = db.session.query(User).get_or_404(id_user,f'Sorry there is no user with id "{id}" registered')
     result = query_user.serialize()
     return jsonify(result),200
  
+
+
+
 
 """ FAVORITE ENDPOINT """
 
@@ -81,28 +84,52 @@ def get_user_favorites(id_user):
 def post_user_favorite_planet(id_user,id_planet):
     db.session.query(User).get_or_404(id_user,f'There is no user with id "{id_user}"')
     db.session.query(Planet).get_or_404(id_planet,f'There is no Planet with id "{id_planet}"')
-    favorite = Favorite(vehicle_id=None, people_id=None, planet_id = id_planet, user_id =id_user)
-    db.session.add(favorite)
-    db.session.commit()
-    return jsonify({"msg":"Done"}),201
+    try:
+        query_favorite = db.session.query(Favorite).filter_by(user_id = id_user, planet_id = id_planet).first()
+        if query_favorite is not None:
+            return jsonify({"msg":"This Planet has been already added to favorites"}),404
+        else:
+            favorite = Favorite(vehicle_id=None, people_id=None, planet_id = id_planet, user_id =id_user)
+        db.session.add(favorite)
+        db.session.commit()
+        return jsonify({"msg":"Done"}),201            
+    except SQLAlchemy as err:
+        return jsonify({"error":"There was an unexpected error","msg":str(err)})
+    
 
 @app.route('/favorites/<int:id_user>/people/<int:id_people>',methods=['POST'])
 def post_user_favorite_people(id_user,id_people):
     db.session.query(User).get_or_404(id_user,f'There is no user with id "{id_user}"')
     db.session.query(People).get_or_404(id_people,f'There is no Planet with id "{id_people}"')
-    favorite = Favorite(vehicle_id=None,planet_id=None,people_id = id_people, user_id =id_user)
-    db.session.add(favorite)
-    db.session.commit()
-    return jsonify({"msg":"Done"}),201
+    try:
+        query_favorite = db.session.query(People).filter_by(user_id=id_user,people_id = id_people).first()
+        if query_favorite is not None:
+            return jsonify({"msg":"This Character has been already added to favorites"}),404
+        else:
+            favorite = Favorite(vehicle_id=None,planet_id=None,people_id = id_people, user_id =id_user)
+            db.session.add(favorite)
+            db.session.commit()
+            return jsonify({"msg":"Done"}),201
+    except SQLAlchemy as err:
+         return jsonify({"error":"There was an unexpected error","msg":str(err)})
+
            
 @app.route('/favorites/<int:id_user>/vehicles/<int:id_vehicle>',methods=['POST'])
 def post_user_favorite_vehicle(id_user,id_vehicle):
     db.session.query(User).get_or_404(id_user,f'There is no user with id "{id_user}"')
     db.session.query(Vehicle).get_or_404(id_vehicle,f'There is no Planet with id "{id_vehicle}"')
-    favorite = Favorite(people_id=None,planet_id=None,vehicle_id = id_vehicle, user_id =id_user)
-    db.session.add(favorite)
-    db.session.commit()
-    return jsonify({"msg":"Done"}),201
+    try:
+        query_favorite = db.session.query(Vehicle).filter_by(user_id = id_user, vehicle_id = id_vehicle)
+        if query_favorite is not None:
+            return jsonify({"msg":"This Vehicle has been already added to favorites"}),404
+        else:
+            favorite = Favorite(people_id=None,planet_id=None,vehicle_id = id_vehicle, user_id =id_user)
+            db.session.add(favorite)
+            db.session.commit()
+            return jsonify({"msg":"Done"}),201
+    except SQLAlchemy as err:
+        return jsonify({"error":"There was an unexpected error","msg":str(err)})
+          
 
 @app.route('/favorites/<int:id_user>/planets/<int:id_planet>',methods=['DELETE'])
 def delete_user_favorite_planet(id_user,id_planet):
@@ -170,6 +197,31 @@ def get_specific_people(id):
     result = query_people.serialize()   
     return jsonify(result),200
     
+@app.route('/people',methods=['POST'])
+def post_new_people():
+    data = request.get_json()       
+    required = {"name","birth_year","eye_color","gender","hair_color","height","mass","skin_color","homeworld"}
+
+    for item in required:
+        if item not in data or not data[item]:
+            return jsonify({"msg":"All fields are required! Check if one or more are empty!"}),400
+
+    try:
+        name = request.json.get("name")  
+        query_people = db.session.query(People).filter_by(name = name).first()
+        if query_people is not None:
+            return jsonify({"msg":"Character with the same name already exists"}),400
+        else:
+            new_character = People( name = data["name"], birth_year = data["birth_year"],eye_color = data["eye_color"], gender = data["gender"], hair_color = data["hair_color"], height = data["height"], mass = data["mass"], skin_color = data["skin_color"],homeworld = data["homeworld"])
+            db.session.add(new_character)
+            db.session.commit()
+            return jsonify({"msg":"New Character was added successfully"}),201
+
+    except SQLAlchemy as err:
+        return jsonify({"error":"There was an unexpected error","msg":str(err)})
+
+
+
 
 """ PLANETS ENDPOITS """
 
@@ -196,6 +248,30 @@ def get_specific_planet(id):
     result = query_planet.serialize()
     return jsonify(result),200
 
+@app.route('/planets',methods=['POST'])
+def post_new_planet():
+    data = request.get_json()       
+    required = {"name","diameter","rotation_period","orbital_period","gravity","population","climate","terrain","surface_water"}
+
+    for item in required:
+        if item not in data or not data[item]:
+            return jsonify({"msg":"All fields are required! Check if one or more are empty!"}),400
+
+    try:
+        name = request.json.get("name")  
+        query_planet = db.session.query(Planet).filter_by(name = name).first()
+        if query_planet is not None:
+            return jsonify({"msg":"Character with the same name already exists"}),400
+        else:
+            new_planet = Planet( name = data["name"], diameter = data["diameter"],rotation_period = data["rotation_period"], orbital_period = data["orbital_period"], gravity = data["gravity"], population = data["population"], climate = data["climate"], terrain = data["terrain"],surface_water = data["surface_water"])
+            db.session.add(new_planet)
+            db.session.commit()
+            return jsonify({"msg":"New Planet was added successfully"}),201
+
+    except SQLAlchemy as err:
+        return jsonify({"error":"There was an unexpected error","msg":str(err)})
+
+
 
 """ VEHICLE ENDPOINTS """
 
@@ -216,6 +292,33 @@ def get_specific_vehicle(vehicle_id):
     query_vehicle = db.session.query(Vehicle).get_or_error_404(vehicle_id,f'There was no Vehicle with id "{vehicle_id}"')
     result = query_vehicle.serialize()
     return jsonify(result),200
+
+
+@app.route('/vehicles',methods=['POST'])
+def post_new_vehicle():
+    data = request.get_json()       
+    required = {"name","model","vehicle_class","manufacturer","lenght","cost_credits","max_speed","cargo_capacity","consumable"}
+
+    for item in required:
+        if item not in data or not data[item]:
+            return jsonify({"msg":"All fields are required! Check if one or more are empty!"}),400
+
+    try:
+        name = request.json.get("name")  
+        query_vehicle = db.session.query(Vehicle).filter_by(name = name).first()
+        if query_vehicle is not None:
+            return jsonify({"msg":"Vehicle with the same name already exists"}),400
+        else:
+            new_vehicle = Vehicle( name = data["name"], model = data["model"], vehicle_class= data["vehicle_class"], manufacturer = data["manufacturer"], lenght = data["lenght"], cost_credits = data["cost_credits"], max_speed = data["max_speed"], cargo_capacity = data["cargo_capacity"],consumable = data["consumable"])
+            db.session.add(new_vehicle)
+            db.session.commit()
+            return jsonify({"msg":"New Vehicle was added successfully"}),201
+
+    except SQLAlchemy as err:
+        return jsonify({"error":"There was an unexpected error","msg":str(err)})
+
+
+
 
 
 
