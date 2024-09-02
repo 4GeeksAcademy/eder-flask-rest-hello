@@ -55,14 +55,15 @@ def get_all_users():
     except Exception as err:
         return({"error":"There was an unexpected error","msg":str(err)}),500        
 
-@app.route('/users/<int:user_id>',methods=['GET'])
-def get_specific_user(user_id):
-    query_user = db.session.query(User).get_or_404(user_id,f'Sorry there is no user with id "{id}" registered')
+@app.route('/users/<int:id_user',methods=['GET'])
+def get_specific_user(id_user):
+    query_user = db.session.query(User).get_or_404(id_user,f'Sorry there is no user with id "{id}" registered')
     result = query_user.serialize()
     return jsonify(result),200
  
 
 """ FAVORITE ENDPOINT """
+
 @app.route('/users/favorites/<int:id_user>',methods=['GET'])
 def get_user_favorites(id_user):
     query_favorites = db.session.query(Favorite).filter_by(user_id=id_user).all()
@@ -80,10 +81,10 @@ def get_user_favorites(id_user):
 def post_user_favorite_planet(id_user,id_planet):
     db.session.query(User).get_or_404(id_user,f'There is no user with id "{id_user}"')
     db.session.query(Planet).get_or_404(id_planet,f'There is no Planet with id "{id_planet}"')
-    favorite = Favorite(vehicle_id=None,people_id=None,planet_id = id_planet, user_id =id_user)
+    favorite = Favorite(vehicle_id=None, people_id=None, planet_id = id_planet, user_id =id_user)
     db.session.add(favorite)
     db.session.commit()
-    return ({"msg":"Done"}),201;
+    return ({"msg":"Done"}),201
 
 @app.route('/favorites/<int:id_user>/people/<int:id_people>',methods=['POST'])
 def post_user_favorite_people(id_user,id_people):
@@ -92,7 +93,7 @@ def post_user_favorite_people(id_user,id_people):
     favorite = Favorite(vehicle_id=None,planet_id=None,people_id = id_people, user_id =id_user)
     db.session.add(favorite)
     db.session.commit()
-    return jsonify({"msg":"Done"}),201;
+    return jsonify({"msg":"Done"}),201
            
 @app.route('/favorites/<int:id_user>/vehicles/<int:id_vehicle>',methods=['POST'])
 def post_user_favorite_vehicle(id_user,id_vehicle):
@@ -101,18 +102,18 @@ def post_user_favorite_vehicle(id_user,id_vehicle):
     favorite = Favorite(people_id=None,planet_id=None,vehicle_id = id_vehicle, user_id =id_user)
     db.session.add(favorite)
     db.session.commit()
-    return jsonify({"msg":"Done"}),201;
+    return jsonify({"msg":"Done"}),201
 
 @app.route('/favorites/<int:id_user>/planets/<int:id_planet>',methods=['DELETE'])
 def delete_user_favorite_planet(id_user,id_planet):
     db.session.query(User).get_or_404(id_user,f'There is no user with id "{id_user}"')
     db.session.query(Planet).get_or_404(id_planet,f'There is no Planet with id "{id_planet}"')
-    toDelete =  db.session.query(Favorite).filter_by(user_id = id_user, planet_id = id_planet).first()      
+    to_delete =  db.session.query(Favorite).filter_by(user_id = id_user, planet_id = id_planet).first()      
     try:
-        if toDelete is None:
+        if to_delete is None:
             return jsonify({"msg":"There was no element to delete"}),404
         else:
-            db.session.delete(toDelete)
+            db.session.delete(to_delete)
             db.session.commit()
             return jsonify({"msg":"Element was deleted"}),204
     except Exception as err: 
@@ -122,12 +123,12 @@ def delete_user_favorite_planet(id_user,id_planet):
 def delete_user_favorite_people(id_user,id_people):
     db.session.query(User).get_or_404(id_user,f'There is no user with id "{id_user}"')
     db.session.query(People).get_or_404(id_people,f'There is no Planet with id "{id_people}"')
-    toDelete =  db.session.query(Favorite).filter_by(user_id = id_user, people_id = id_people).first()      
+    to_delete =  db.session.query(Favorite).filter_by(user_id = id_user, people_id = id_people).first()      
     try:
-        if toDelete is None:
+        if to_delete is None:
             return jsonify({"msg":"There was no element to delete"}),404
         else:
-            db.session.delete(toDelete)
+            db.session.delete(to_delete)
             db.session.commit()
             return jsonify({"msg":"Element was deleted"}),204
     except Exception as err: 
@@ -137,12 +138,12 @@ def delete_user_favorite_people(id_user,id_people):
 def delete_user_favorite_vehicle(id_user,id_vehicle):
     db.session.query(User).get_or_404(id_user,f'There is no user with id "{id_user}"')
     db.session.query(Vehicle).get_or_404(id_vehicle,f'There is no Planet with id "{id_vehicle}"')
-    toDelete =  db.session.query(Favorite).filter_by(user_id = id_user, vehicle_id = id_vehicle).first()      
+    to_delete =  db.session.query(Favorite).filter_by(user_id = id_user, vehicle_id = id_vehicle).first()      
     try:
-        if toDelete is None:
+        if to_delete is None:
             return jsonify({"msg":"There was no element to delete"}),404
         else:
-            db.session.delete(toDelete)
+            db.session.delete(to_delete)
             db.session.commit()
             return jsonify({"msg":"Element was deleted"}),204
     except Exception as err: 
@@ -165,9 +166,9 @@ def get_all_people():
     
 @app.route('/people/<int:id>',methods=['GET'])
 def get_specific_people(id):
-    query_people = People.query.get_or_404(id)    
+    query_people = People.query.get_or_404(id,f'There was no Character with id "{id}"')    
     result = query_people.serialize()   
-    return jsonify(result)
+    return jsonify(result),200
     
 
 """ PLANETS ENDPOITS """
@@ -181,19 +182,19 @@ def get_all_planets():
 
     try:
         if query_planets == None:
-            return ({"msg":"There are no planets registered yet"})
+            return jsonify({"msg":"There are no planets registered yet"}),404
         else: 
             result = list(map(lambda item: item.serialize(),query_planets))
-            return jsonify(result)
+            return jsonify(result),200
     except Exception as err:
-        return ({"error":"There was an unexpected error","error":str(err)})
+        return jsonify({"error":"There was an unexpected error","error":str(err)}),500
     
    
 @app.route('/planets/<int:id>',methods=['GET'])
 def get_specific_planet(id):
     query_planet = db.session.query(Planet).get_or_404(id,f'Sorry there is no planet with id "{id}" registered')
     result = query_planet.serialize()
-    return jsonify(result)
+    return jsonify(result),200
 
 
 """ VEHICLE ENDPOINTS """
@@ -203,18 +204,18 @@ def get_all_vehicles():
     query_vehicles = db.session.query(Vehicle).all()
     try:
         if query_vehicles == None:
-            return ({"msg":"There are no vehicles registered yet"})
+            return jsonify({"msg":"There are no vehicles registered yet"}),404
         else: 
             result = list(map(lambda item: item.serialize(),query_vehicles))
-            return jsonify(result)
+            return jsonify(result),200
     except Exception as err:
-        return ({"error":"There was an unexpected error","msg":str(err)})
+        return jsonify({"error":"There was an unexpected error","msg":str(err)}),500
 
 @app.route('/vehicles/<int:vehicle_id>',methods=['GET'])
 def get_specific_vehicle(vehicle_id):
-    query_vehicle = db.session.query(Vehicle).get_or_error_404(vehicle_id)
+    query_vehicle = db.session.query(Vehicle).get_or_error_404(vehicle_id,f'There was no Vehicle with id "{vehicle_id}"')
     result = query_vehicle.serialize()
-    return jsonify(result)
+    return jsonify(result),200
 
 
 
