@@ -129,9 +129,9 @@ class People(db.Model):
 
 class Favorite(db.Model):
     favoriteID = db.Column(db.Integer,primary_key=True)
-    people_id = db.Column(db.Integer,db.ForeignKey('people.peopleID'))
-    vehicle_id = db.Column(db.Integer,db.ForeignKey('vehicle.vehicleID'))
-    planet_id = db.Column(db.Integer,db.ForeignKey('planet.planetID'))
+    people_id = db.Column(db.Integer,db.ForeignKey('people.peopleID'),nullable=True)
+    vehicle_id = db.Column(db.Integer,db.ForeignKey('vehicle.vehicleID'),nullable=True)
+    planet_id = db.Column(db.Integer,db.ForeignKey('planet.planetID'),nullable=True)
     user_id = db.Column(db.Integer,db.ForeignKey('user.id'))
 
     def __repr__(self):
@@ -142,7 +142,8 @@ class Favorite(db.Model):
             "id": self.favoriteID,
             "people_id":self.people_id,
             "vehicle_id":self.vehicle_id,
-            "planet_id":self.planet_id                                      
+            "planet_id":self.planet_id,
+            "user_id": self.user_id                                      
             # do not serialize the password, its a security breach
         }
 
