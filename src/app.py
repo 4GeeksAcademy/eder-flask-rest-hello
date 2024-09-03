@@ -220,6 +220,20 @@ def post_new_people():
     except SQLAlchemy as err:
         return jsonify({"error":"There was an unexpected error","msg":str(err)})
 
+""" @app.route('/people/<int:id_planet>',methods=['POST'])
+def put_specific_people(id_planet):
+    data = request.get_json()
+    query_people = db.session.query(Planet).get_or_404(id_planet,f'There no planet with id "{id_planet}" registered yet')
+    required = {"name","birth_year","eye_color","gender","hair_color","height","mass","skin_color","homeworld"}
+
+    try:        
+        for item in required:
+            if item in data and data[item]:
+                query_people[item] = data[item]
+                db.session.commit()
+        return jsonify({"msg":" Character was moded successfully"}),200       
+    except SQLAlchemy as err:
+        return jsonify({"error":"There was an unexpected error","msg":str(err)}) """
 
 
 
